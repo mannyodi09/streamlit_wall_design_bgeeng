@@ -712,7 +712,7 @@ try:
                                 st.markdown("In-plane capacity excluding wall reinforcement:")
                                 st.latex(Vuc_latex)
 
-                        #2. Contribution to shear strength by wall reinforcement
+                        #2. Contribution to shear strength by wall reinforcements
                         with col1:
                             st.markdown("(b) Contribution to shear strength by wall reinforcement(cl11.6.4)")
                             
