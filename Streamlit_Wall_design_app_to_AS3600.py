@@ -108,7 +108,7 @@ try:
             p_compr_idxmax = p_compr.groupby(["Story","Pier"])["P"].idxmin()
             p_compr_max = p_compr.loc[p_compr_idxmax]
             #st.dataframe(p_compr_max)
-            p_compr_max = p_compr_max.set_index("Story")
+            #p_compr_max = p_compr_max.set_index("Story")
 
             #st.dataframe(df_storey_heights)
             df_story_height = df_storey_heights.drop([0], axis=0)
