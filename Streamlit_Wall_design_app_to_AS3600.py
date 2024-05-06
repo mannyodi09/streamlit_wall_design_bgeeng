@@ -1540,9 +1540,18 @@ try:
                 st.write('<p style="color: green;"><b>3. Reinforcement detailing</b></p>',unsafe_allow_html=True)
                 if float(fc)<51:
                     if pw4 < 0.01 and pw3 > 0.0025:
-                        st.write('<p style="color: green;">Restraint to vertical reinforcement is not required</p>', unsafe_allow_html=True)
+                        st.write('<p style="color: green;">Restraint to vertical reinforcement is not required provided vertical reiforcement is not used as compressive reinforcement cl11.7.4(b).</p>', unsafe_allow_html=True)
                     elif pw4 > 0.01 or pw3 < 0.0025:
-                        st.write('<p style="color: red;">phi x Nuo check</p>', unsafe_allow_html=True)
+                        Nuo = st.number_input (label="Column ultimate capacity (From M-N Interaction diagram):",min_value=100,max_value=1000000)
+                        Nuo_2 = 0.5*0.85*Nuo
+                        #st.write(Nuo_2)
+                        N_stress = Pier_forces_col['Net compression stress']*si.MPa
+                        N_2 = (N_stress*Lw*tw).prefix('k')
+                        #st.write(N_2)
+                        if float(N_2) > Nuo_2:
+                            st.write('<p style="color: red;">Provide restraint to vertical reinforcement in accordance with cl10.7.4 or reduce vertical reinforcement ratio to satisfy cl11.7.4(b).</p>', unsafe_allow_html=True)
+                        else:
+                            st.write('<p style="color: green;">Restraint to vertical reinforcement is not required(cl11.7.4)</p>', unsafe_allow_html=True)                     
                 elif float(fc)>51:
                     st.write('<p style="color: red;">Provide restraint to vertical reinforcement in accordance with clause 14.5.4</p>', unsafe_allow_html=True)
 
