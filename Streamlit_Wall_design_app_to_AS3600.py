@@ -28,6 +28,7 @@ with tab1:
     st.markdown("* All walls are assumed to be braced and in determining the effective height of the walls, one-way buckling and a k-factor of 1 have been adopted.")
     st.markdown("* This application is not a substitute for critical thinking and professional judgement. Users should independently review and validate the results obtained and, when in doubt, seek guidance of experienced engineers. ")
     st.markdown("* Slender walls will be addressed in future updates.")
+    st.markdown("* Ductile walls (mu=2 and above) is still in progress and will be addressed in future updates.")
 try:
     with tab2:
         Ductility_factor = st.selectbox("Select Ductility factor (μ):", options=('1','2','3'))
