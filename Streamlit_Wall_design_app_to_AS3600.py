@@ -518,9 +518,9 @@ try:
 
         with tab4:
             #Soil_classification = st.selectbox("Site soil classification:", options=('Ae - Strong rock','Be - Rock','Ce - Shallow soil', 'De - Deep or soft soil', 'Ee - Very soft soil'))
-            if Soil_classification == "De - Deep or soft soil" or Soil_classification == "Ee - Very soft soil""Ee - Very soft soil":
+            if Soil_classification == "De - Deep or soft soil" or Soil_classification == "Ee - Very soft soil":
                 st.markdown("Simplified design method for compression forces does not apply (CL11.5.2(c)), design all walls as columns as per Section 10.")
-            else:
+            elif Soil_classification == "Ae - Strong rock" or Soil_classification == "Be - Rock" or Soil_classification == "Ce - Shallow soil":
                 df=design_wall
                 df.set_index(['Pier',df.index], inplace=True)
                 st.markdown("Walls with no tensile stresses")
@@ -715,7 +715,7 @@ try:
                         #2. Contribution to shear strength by wall reinforcements
                         with col1:
                             st.markdown("(b) Contribution to shear strength by wall reinforcement(cl11.6.4)")
-                            
+
                         @handcalc()
                         def hor_reo_ratio(Horz_bar_dia: float, Horz_bar_spc: float,tw: float):
                             """
@@ -729,16 +729,39 @@ try:
                             st.write("Horizontal reo ratio(pw)", pw2)
                             if pw2 < 0.0025:
                                 st.write('<p style="color: red;">Horizontal reo ratio is less than 0.0025, NG!!</p>', unsafe_allow_html=True)
+                        pw2 = hor_reo_ratio(Horz_bar_dia, Horz_bar_spc,tw)
+
+                        @handcalc()
+                        def vert_reo_ratio(Vert_bar_dia: float, Vert_bar_spc: float,tw: float) -> float:
+                            """
+                            Returns the reo ratio in the horizontal direction
+                            """
+                            pw3 = ((math.pi*float(Vert_bar_dia)**2/4)*((1000/float(Vert_bar_spc))*2)/(1000*float(tw)))
+                            return pw3
+                        pw3 = vert_reo_ratio(Vert_bar_dia, Vert_bar_spc,tw)
+
+                        @handcalc()
+                        def reo_ratio_for_shear(pw2: float, pw3: float) -> float:
+                            """
+                            Returns the reo ratio to be used for contribution of steel to the ultimate shear strength of a wall by wall reinforcement(Vus)
+                            """
+                            if Hw/Lw < 1 or Hw/Lw == 1:
+                                pw_vus = min(pw2,pw3)
+                            if Hw/Lw > 1:
+                                pw_vus = pw2
+                            return pw_vus
+                        pw_vus = reo_ratio_for_shear(pw2,pw3)
+                            
                             #else:
                                 #st.write('<p style="color: green;">Wall segment compression capacity, OKAY!!</p>', unsafe_allow_html=True)
 
-                            @handcalc()
-                            def Shear_strength_with_reo(pw: float, Lw: float, fsy: float) -> float:
-                                """
-                                Returns the contribution to shear strength by wall reinforcement
-                                """
-                                Vus = (max(0.0025,((pw2 * fsy*si.MPa)*0.8*Lw*tw))).prefix('k')
-                                return Vus
+                        @handcalc()
+                        def Shear_strength_with_reo(pw_vus: float, Lw: float, fsy: float) -> float:
+                            """
+                            Returns the contribution to shear strength by wall reinforcement
+                            """
+                            Vus = ((pw_vus * fsy*si.MPa)*0.8*Lw*tw).prefix('k')
+                            return Vus
                         with col1:
                             Vus_latex, Vus_value = Shear_strength_with_reo(pw,Lw,fsy)
                             Vus = round(float(Vus_value),2)
@@ -903,6 +926,8 @@ try:
                 st.write('<p style="color: green;"><b>A. Squash load</b></p>',unsafe_allow_html=True)
             tw = Pier_forces_col['b']*si.mm
             Lw = (Pier_forces_col['d']*si.mm).prefix('unity')
+            Lw = Pier_forces_col['d'] * si.mm
+            Hw = Pier_forces_col['H'] * si.mm
             fc = float(concrete_fc)*si.MPa
             @handcalc()
             def squash_load(fc: float,Lw: float, tw: float) -> float:
@@ -1336,7 +1361,7 @@ try:
             N = abs(Pier_forces_col['P(Compr)'])
             Hw2 = (Pier_forces_col['H']*si.mm).prefix('unity')
             Lw = (Pier_forces_col['d']*si.mm).prefix('unity')
-            def alphac(N: float, Nuo: float, Hw: float) -> float:
+            def alphac(N: float, Nuo: float, Hw2: float) -> float:
                 """
                 Return the alphac value of the wall.
                 """
@@ -1346,14 +1371,14 @@ try:
                 else:
                     alphac = math.sqrt(2.25-((2.5*N)/(0.6*Nuo)))
                 return alphac
-            alphac = alphac(N, Nuo, Hw)
+            alphac = alphac(N, Nuo, Hw2)
             #st.write (alphac)
 
             M11 = 0.1*abs(Pier_forces_col['M3(Compr)'])
             M22 = abs(Pier_forces_col['M3(Compr)'])
 
             #@handcalc()
-            def shortcolumn(Hw: float, alphac: float,fc: float, M11: float, M22: float) -> float:
+            def shortcolumn(Hw2: float, alphac: float,fc: float, M11: float, M22: float) -> float:
                 M11M22 = M11/M22
                 req1 = Hw2/(Lw/3)
                 req2 = alphac*(38-(fc/15))*(1+M11M22)
