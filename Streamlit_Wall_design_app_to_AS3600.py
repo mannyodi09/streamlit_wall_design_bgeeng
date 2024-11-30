@@ -29,7 +29,6 @@ with tab1:
     st.markdown("* This application is not a substitute for critical thinking and professional judgement. Users should independently review and validate the results obtained and, when in doubt, seek guidance of experienced engineers. ")
     st.markdown("* Slender walls will be addressed in future updates.")
     st.markdown("* Ductile walls (mu=2 and above) is still in progress and will be addressed in future updates.")
-try:
     with tab2:
         Ductility_factor = st.selectbox("Select Ductility factor (μ):", options=('1','2','3'))
         if Ductility_factor=='1':
@@ -77,7 +76,7 @@ try:
 
             df_story=df_story_height2
             Story_list = df_story['Name'].tolist()
-            stories = Story_list[:-1]
+            stories = Story_list#[:-1]
 
             story_categorical = pd.CategoricalDtype(stories, ordered=True)
             p_tens_max.index = p_tens_max.index.astype(story_categorical)
@@ -122,7 +121,7 @@ try:
 
             df_story=df_story_height2
             Story_list = df_story['Name'].tolist()
-            stories = Story_list[:-1]
+            stories = Story_list#[:-1]
 
             story_categorical = pd.CategoricalDtype(stories, ordered=True)
             p_compr_max.index = p_compr_max.index.astype(story_categorical)
@@ -167,7 +166,7 @@ try:
 
             ##Story heights
             story_prop=df_story_height2
-            story_properties = story_prop.iloc[:-1]
+            story_properties = story_prop#.iloc[:-1]
             story_prop3=story_properties.rename(columns={"Name":"Story"})
             story_prop4=story_prop3.set_index("Story")
             #st.dataframe(story_prop4)
@@ -544,12 +543,15 @@ try:
 
                 with col1:
                     st.write("<u>Wall section input</u>",unsafe_allow_html=True)
-                    tw = (Pier_forces['b'])#.prefix('unity')
-                    st.write("Width (mm):", tw)
-                    Hwe = Pier_forces['H']
-                    st.write("Effective height (mm):", Hwe)
-                    Lw = (Pier_forces['d'])#.prefix('unity')
-                    st.write("Length (mm):", Lw)
+                    try:
+                        tw = (Pier_forces['b'])#.prefix('unity')
+                        st.write("Width (mm):", tw)
+                        Hwe = Pier_forces['H']
+                        st.write("Effective height (mm):", Hwe)
+                        Lw = (Pier_forces['d'])#.prefix('unity')
+                        st.write("Length (mm):", Lw)
+                    except NameError:
+                        st.write("All walls to be designed as columns")
 
                     pw = 0.0025
                     st.write("Minimum reo ratio in horizontal & vertical direction(cl11.7.1):", pw)
@@ -1574,5 +1576,5 @@ try:
         st.markdown("**Mobile**: 0406736008")
 #except NameError:
             #st.markdown("Upload an Etabs File to continue")
-except KeyError:
-            st.markdown("Etabs files uploaded incorrectly")
+#except KeyError:
+            #st.markdown("Etabs files uploaded incorrectly")
